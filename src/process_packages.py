@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 import tarfile
-from pathlib import Path
 from os import getenv
-from shutil import rmtree, copytree
+from pathlib import Path
+from shutil import copytree, rmtree
 
 import bagit
 import boto3
@@ -14,8 +14,8 @@ from PIL import Image
 
 def main(spreadsheet_path, restricted_batch, aws_role_name, aws_bucket_name, restricted_dir, uploaded_dir):
     """Main method which calls all other submethods."""
-    for current_dir, refid in to_process(spreadsheet_path):   
-        package_root_path = Path(current_dir) 
+    for current_dir, refid in to_process(spreadsheet_path):
+        package_root_path = Path(current_dir)
         package_payload_path = Path(current_dir)
         package_type = 'dir'
         if 'Backlog Project' in current_dir:
@@ -29,7 +29,7 @@ def main(spreadsheet_path, restricted_batch, aws_role_name, aws_bucket_name, res
             renamed_path = package_root_path
             if package_type == 'dir':
                 renamed_path = rename_files(package_root_path, refid)
-    
+
             if restricted_batch:
                 move_to_dir(renamed_path, restricted_dir)
             else:
@@ -61,7 +61,7 @@ def to_process(spreadsheet_path):
 
 def move_to_dir(current_path, target_dir):
     """Move digitized directory or file to new target.
-    
+
     Args:
         current_path (pathlib.Path): current path of digitized object
         target_dir (str): path for new digitized object
@@ -77,7 +77,7 @@ def move_to_dir(current_path, target_dir):
 
 def is_valid_package(dir_path):
     """Validates package structure and assets.
-    
+
     Args:
         dir_path (pathlib.Path): path of digitized object to validate.
     """
@@ -107,7 +107,7 @@ def validate_directories(dir_path):
 
 def validate_file_counts(dir_path, current_dir):
     """Asserts correct number of files is present in each directory.
-    
+
     Args:
         dir_path (pathlib.Path): path of digitized assets.
         current_dir (str): Name of the top-level directory containing assets.
@@ -197,7 +197,7 @@ def validate_file_formats(bag_path):
 
 def remove_unwanted_files(dir_path):
     """Removes unwanted files from directory.
-    
+
     Args:
         dir_path (pathlib.Path): directory from which files should be removed.
     """
@@ -208,7 +208,7 @@ def remove_unwanted_files(dir_path):
 
 def rename_files(dir_path, refid):
     """Renames files associated with a digital object to match RAC specifications.
-    
+
     Args:
         dir_path (pathlib.Path): path of digital object to rename
         refid (str): ref ID for digital object, used as basis for file renaming
@@ -223,12 +223,12 @@ def rename_files(dir_path, refid):
             fp.rename(new_name)
     copytree(dir_path, dir_path.with_name(refid))
     rmtree(dir_path)
-    return(dir_path.with_name(refid))
+    return (dir_path.with_name(refid))
 
 
 def create_bag(dir):
     """Creates BagIt bag from directory.
-    
+
     Args:
         dir (str): Path to directory to be bagged
     """
@@ -237,7 +237,7 @@ def create_bag(dir):
 
 def update_bag(dir):
     """Updates existing BagIt bag.
-    
+
     Args (str): Directory containing bag to be updated
     """
     bag = bagit.Bag(dir)
@@ -246,7 +246,7 @@ def update_bag(dir):
 
 def create_tarball(dir_path):
     """Create tarball from bagged path.
-    
+
     Args:
         dir_path (pathlib.Path): path of digital object to tarball
 
@@ -261,7 +261,7 @@ def create_tarball(dir_path):
 
 def upload_package(tarball_path, aws_bucket_name, aws_role_name):
     """Uploads package to S3 bucket.
-    
+
     Args:
         tarball_path (pathlib.Path): Path of file to upload.
         client (boto3.client): S3 client
