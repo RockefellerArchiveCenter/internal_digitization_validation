@@ -1,0 +1,38 @@
+bagit==1.9.0
+    # via -r requirements.in
+boto3==1.43.72
+    # via -r requirements.in
+botocore==1.43.72
+    # via
+    #   boto3
+    #   s3transfer
+et-xmlfile==2.0.0
+    # via openpyxl
+jmespath==1.1.0
+    # via
+    #   boto3
+    #   botocore
+numpy==2.5.2
+    # via pandas
+openpyxl==3.1.5
+    # via -r requirements.in
+pandas==2.3.3
+    # via -r requirements.in
+pillow==11.3.0
+    # via -r requirements.in
+pymupdf==1.28.2
+    # via -r requirements.in
+python-dateutil==2.9.0.post0
+    # via
+    #   botocore
+    #   pandas
+pytz==2026.3.post1
+    # via pandas
+s3transfer==0.19.2
+    # via boto3
+six==1.17.0
+    # via python-dateutil
+tzdata==2026.3
+    # via pandas
+urllib3==2.7.0
+    # via botocore
