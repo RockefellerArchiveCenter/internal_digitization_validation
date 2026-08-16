@@ -1,0 +1,251 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  internal-digitized-image-validation
+
+  Handles validation of digitized still image and textual assets produced through internal processes.
+
+Parameters:
+  ContainerAccountId:
+    Type: String
+    Description: Account ID under which container repository is located.
+    Default: '817658541382'
+  ApplicationEnvironment:
+    Type: String
+    Description: Environment in which application should be deployed.
+    AllowedValues:
+      - dev
+      - prod
+  ApplicationName:
+    Type: String
+    Description: Name of the application to be deployed.
+    Default: internal_digitized_image_pipeline
+  Workload:
+    Type: String
+    Description: Name of workload for this stack.
+    Default: internal_digitized_image_pipeline
+
+Mappings:
+  Directories:
+    InvalidDir:
+      dev: invalid
+      prod: invalid
+    UploadedDir:
+      dev: uploaded
+      prod: uploaded
+
+Resources:
+  ECSTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Tags:
+        - Key: Environment
+          Value: !Ref ApplicationEnvironment
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: Workload
+          Value: !Ref Workload
+        - Key: WorkloadType
+          Value: processing
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: LogPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: 
+                  - !GetAtt InternalValidationLogGroup.Arn
+        - PolicyName: EcrPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - 'ecr:BatchCheckLayerAvailability'
+                  - 'ecr:GetDownloadUrlForLayer'
+                  - 'ecr:BatchGetImage'
+                Resource: 
+                  - !Sub arn:${AWS::Partition}:ecr:${AWS::Region}:${ContainerAccountId}:repository/${ApplicationName}
+              - Effect: Allow
+                Action:
+                  - 'ecr:GetAuthorizationToken'
+                Resource: "*"
+        - PolicyName: SSMPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'ssm:GetParameters'
+                Resource:
+                  - !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ApplicationEnvironment}/${ApplicationName}/*
+
+  InternalDigitizedImageValidationUser:
+    Type: AWS::IAM::User
+    Properties:
+      Tags:
+        - Key: Environment
+          Value: !Ref ApplicationEnvironment
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: Workload
+          Value: !Ref Workload
+        - Key: WorkloadType
+          Value: processing
+
+  InternalDigitizedImageValidationUserAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties: 
+      UserName: !Ref InternalDigitizedImageValidationUser
+
+  InternalDigitizedImageValidationUserIdParameter:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Description: Secret Access Key ID for DigitizedImageValidationUser.
+      Name: !Sub /${ApplicationEnvironment}/${ApplicationName}/AWS_ACCESS_KEY_ID
+      Tags: 
+        Environment: !Ref ApplicationEnvironment
+        Application: !Ref ApplicationName
+        Workload: !Ref Workload
+        WorkloadType: processing
+      Type: String
+      Value: !Ref InternalDigitizedImageValidationUserAccessKey
+
+  InternalDigitizedImageValidationUserKeyParameter:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Description: Secret Access Key for DigitizedImageValidationUser.
+      Name: !Sub /${ApplicationEnvironment}/${ApplicationName}/AWS_SECRET_ACCESS_KEY
+      Tags: 
+        Environment: !Ref ApplicationEnvironment
+        Application: !Ref ApplicationName
+        Workload: !Ref Workload
+        WorkloadType: processing
+      Type: String
+      Value: !GetAtt InternalDigitizedImageValidationUserAccessKey.SecretAccessKey
+
+  InternalDigitizedImageValidationS3Role:
+    Type: AWS::IAM::Role
+    Properties: 
+      Tags:
+        - Key: Environment
+          Value: !Ref ApplicationEnvironment
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: Workload
+          Value: !Ref Workload
+        - Key: WorkloadType
+          Value: processing
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: 
+              AWS:
+                - !GetAtt InternalDigitizedImageValidationUser.Arn
+            Action:
+              - 'sts:AssumeRole'
+      Description: 'Allows management of S3 assets.'
+      Policies:
+        - PolicyName: InternalDigitizedImageValidationS3ObjectPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - 's3:GetObject'
+                  - 's3:DeleteObject'
+                  - 's3:PutObject'
+                Resource: 
+                  - !Sub arn:${AWS::Partition}:s3:::rac-${ApplicationEnvironment}-image-upload/*
+
+  InternalValidationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: !Sub "/internal_digitized_image/ecs/${ApplicationName}"
+      RetentionInDays: 90
+      Tags:
+        - Key: Environment
+          Value: !Ref ApplicationEnvironment
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: Workload
+          Value: !Ref Workload
+        - Key: WorkloadType
+          Value: processing
+
+  InternalValidationECSTask:
+    Type: AWS::ECS::TaskDefinition
+    Properties: 
+      Cpu: "1024"
+      Memory: "3072"
+      ContainerDefinitions: 
+        - Name: !Ref ApplicationName
+          Image: !Sub "${ContainerAccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ApplicationName}:${ApplicationEnvironment}"
+          Essential: true
+          Environment:
+            - Name: AWS_ROLE_ARN
+              Value: !GetAtt InternalDigitizedImageValidationS3Role.Arn
+            - Name: ENV
+              Value: !Ref ApplicationEnvironment
+            - Name: AWS_BUCKET_NAME
+              Value: !Sub rac-${ApplicationEnvironment}-image-upload
+            - Name: AWS_REGION_NAME
+              Value: !Ref AWS::Region
+            - Name: RESTRICTED_DIR
+              Value: !FindInMap [Directories, RestrictedDir, !Ref ApplicationEnvironment]
+            - Name: UPLOADED_DIR
+              Value: !FindInMap [Directories, UploadedDir, !Ref ApplicationEnvironment]
+          # MountPoints:
+          #   - SourceVolume: ebs
+          #     ContainerPath: !Ref EbsStorageMountPath
+          #     ReadOnly: false
+          ReadonlyRootFilesystem: true
+          Secrets:
+            - Name: AWS_ACCESS_KEY_ID
+              ValueFrom: !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter${InternalDigitizedImageValidationUserIdParameter}'
+            - Name: AWS_SECRET_ACCESS_KEY
+              ValueFrom: !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter${InternalDigitizedImageValidationUserKeyParameter}'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              "awslogs-group": !Ref InternalValidationLogGroup
+              "awslogs-region": "us-east-1"
+              "awslogs-stream-prefix": "ecs"
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      Family: !Ref ApplicationName
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      RuntimePlatform:
+        CpuArchitecture: X86_64
+        OperatingSystemFamily: LINUX
+      Tags:
+        - Key: Environment
+          Value: !Ref ApplicationEnvironment
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: Workload
+          Value: !Ref Workload
+        - Key: WorkloadType
+          Value: processing
+      # Volumes: 
+      #   - Name: ebs
+      #     ConfiguredAtLaunch: true
+
+Outputs:
+  ValidationECSTask:
+    Description: "Validation ECS Task Definition ARN"
+    Value: !Ref InternalValidationECSTask
