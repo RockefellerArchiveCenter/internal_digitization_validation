@@ -256,6 +256,7 @@ def create_tarball(dir_path):
     tar_path = dir_path.with_name(f"{dir_path.name}.tar.gz")
     with tarfile.open(tar_path, "w:gz") as tf:
         tf.add(dir_path, arcname=dir_path.name)
+    rmtree(dir_path)
     return tar_path
 
 
@@ -277,8 +278,8 @@ if __name__ == '__main__':
     restricted_batch = getenv('RESTRICTED_BATCH')
     aws_role_name = getenv('AWS_ROLE_NAME')
     aws_bucket_name = getenv('AWS_BUCKET_NAME')
-    restricted_dir = getenv("RESTRICTED_DIR")
-    uploaded_dir = getenv("UPLOADED_DIR")
+    restricted_dir = getenv('RESTRICTED_DIR')
+    uploaded_dir = getenv('UPLOADED_DIR')
     main(
         spreadsheet_path,
         restricted_batch,
