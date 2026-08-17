@@ -18,7 +18,8 @@ DEFAULT_ARGS = [
     'aws:iam:role:internal-digitization-role',
     'rac-dev-digitized-image-upload',
     'restricted',
-    'uploaded']
+    'uploaded',
+    '/local_storage']
 
 BAG_REFID = "b90862f3baceaae3b7418c78f9d50d52"
 FIXTURE_PATH = Path("tests", "fixtures", BAG_REFID)
@@ -122,7 +123,7 @@ def test_main_with_bag(
 def test_main_with_restricted(
         mock_move, mock_upload, mock_tarball, mock_update_bag, mock_create_bag,
         mock_rename, mock_is_valid, mock_unwanted, mock_data):
-    current_dir = 'volumes/data/Digitization/123456'
+    current_dir = '/volumes/data/Digitization/123456'
     refid = '1a2b3c4d5e6f7h8i9j10k'
     mock_data.return_value = [(current_dir, refid)]
     mock_is_valid.return_value = True

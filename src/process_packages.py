@@ -12,14 +12,14 @@ import pymupdf
 from PIL import Image
 
 
-def main(spreadsheet_path, restricted_batch, aws_role_name, aws_bucket_name, restricted_dir, uploaded_dir):
+def main(spreadsheet_path, restricted_batch, aws_role_name, aws_bucket_name, restricted_dir, uploaded_dir, root_dir):
     """Main method which calls all other submethods."""
     for current_dir, refid in to_process(spreadsheet_path):
-        package_root_path = Path(current_dir)
-        package_payload_path = Path(current_dir)
+        package_root_path = Path(root_dir, current_dir)
+        package_payload_path = Path(root_dir, current_dir)
         package_type = 'dir'
         if 'Backlog Project' in current_dir:
-            package_payload_path = Path(current_dir, 'data')
+            package_payload_path = Path(root_dir, current_dir, 'data')
             package_type = 'bag'
         assert package_root_path.is_dir(), f"Package does not exist at {package_root_path}"
 
@@ -280,10 +280,12 @@ if __name__ == '__main__':
     aws_bucket_name = getenv('AWS_BUCKET_NAME')
     restricted_dir = getenv('RESTRICTED_DIR')
     uploaded_dir = getenv('UPLOADED_DIR')
+    root_dir = getenv('ROOT_DIR')
     main(
         spreadsheet_path,
         restricted_batch,
         aws_role_name,
         aws_bucket_name,
         restricted_dir,
-        uploaded_dir)
+        uploaded_dir,
+        root_dir)

@@ -32,6 +32,9 @@ Mappings:
     UploadedDir:
       dev: uploaded
       prod: uploaded
+    LocalStorageMountDir:
+      dev: /local_storage
+      prod: /local_storage
 
 Resources:
   ECSTaskExecutionRole:
@@ -208,10 +211,12 @@ Resources:
               Value: !FindInMap [Directories, RestrictedDir, !Ref ApplicationEnvironment]
             - Name: UPLOADED_DIR
               Value: !FindInMap [Directories, UploadedDir, !Ref ApplicationEnvironment]
-          # MountPoints:
-          #   - SourceVolume: ebs
-          #     ContainerPath: !Ref EbsStorageMountPath
-          #     ReadOnly: false
+            - Name: ROOT_DIR
+              Value: !FindInMap [Directories, LocalStorageMountDir, !Ref ApplicationEnvironment]
+          MountPoints:
+            - SourceVolume: local_storage
+              ContainerPath: !FindInMap [Directories, LocalStorageMountDir, !Ref ApplicationEnvironment]
+              ReadOnly: false
           ReadonlyRootFilesystem: true
           Secrets:
             - Name: AWS_ACCESS_KEY_ID
@@ -226,9 +231,9 @@ Resources:
               "awslogs-stream-prefix": "ecs"
       ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
       Family: !Ref ApplicationName
-      NetworkMode: awsvpc
+      NetworkMode: none
       RequiresCompatibilities:
-        - FARGATE
+        - EXTERNAL
       RuntimePlatform:
         CpuArchitecture: X86_64
         OperatingSystemFamily: LINUX
@@ -241,9 +246,10 @@ Resources:
           Value: !Ref Workload
         - Key: WorkloadType
           Value: processing
-      # Volumes: 
-      #   - Name: ebs
-      #     ConfiguredAtLaunch: true
+      Volumes: 
+        - Name: local_storage
+          Host: 
+            SourcePath: tbd
 
 Outputs:
   ValidationECSTask:
