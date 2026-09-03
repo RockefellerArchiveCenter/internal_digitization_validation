@@ -33,8 +33,8 @@ Mappings:
       dev: uploaded
       prod: uploaded
     LocalStorageMountDir:
-      dev: /local_storage
-      prod: /local_storage
+      dev: /assets
+      prod: /assets
 
 Resources:
   ECSTaskExecutionRole:
@@ -228,7 +228,7 @@ Resources:
             Options:
               "awslogs-group": !Ref InternalValidationLogGroup
               "awslogs-region": "us-east-1"
-              "awslogs-stream-prefix": "ecs"
+              "awslogs-stream-prefix": "on-prem"
       ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
       Family: !Ref ApplicationName
       NetworkMode: none
@@ -249,7 +249,7 @@ Resources:
       Volumes: 
         - Name: local_storage
           Host: 
-            SourcePath: tbd
+            SourcePath: "/mnt/dev"
 
 Outputs:
   ValidationECSTask:
