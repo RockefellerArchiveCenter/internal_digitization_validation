@@ -18,7 +18,7 @@ Parameters:
   ApplicationName:
     Type: String
     Description: Name of the application to be deployed.
-    Default: internal_digitization_pipeline
+    Default: internal_digitization_validation
   Workload:
     Type: String
     Description: Name of workload for this stack.

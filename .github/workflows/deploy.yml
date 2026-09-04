@@ -20,7 +20,7 @@ jobs:
       name: ${{ github.ref_name }}
 
     env:
-      APP_NAME: internal_image_validation
+      APP_NAME: internal_digitization_validation
 
     steps:
       - name: Checkout Repository
