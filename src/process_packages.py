@@ -139,8 +139,8 @@ def upload_package(tarball_path, aws_bucket_name, aws_role_name):
 
     Args:
         tarball_path (pathlib.Path): Path of file to upload.
-        client (boto3.client): S3 client
         aws_bucket_name (str): name of S3 bucket to upload files to
+        aws_role_name (str): Name of AWS role to assume in session
     """
     aws_session = boto3.Session(profile_name=aws_role_name)
     s3_client = aws_session.client('s3')

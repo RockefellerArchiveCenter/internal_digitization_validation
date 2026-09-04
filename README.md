@@ -1,5 +1,5 @@
 # internal_digitization_validation
-Validator for digitized still image and textual assets produced through internal processes.
+Validator for digitized assets produced through internal processes.
 
 ## Getting Started
 
