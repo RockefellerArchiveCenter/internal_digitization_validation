@@ -1,7 +1,11 @@
+aws-assume-role-lib==2.10.0
+    # via -r requirements.in
 bagit==1.9.0
     # via -r requirements.in
 boto3==1.43.88
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   aws-assume-role-lib
 botocore==1.43.88
     # via
     #   boto3
