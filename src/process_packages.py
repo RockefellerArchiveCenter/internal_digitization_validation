@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import logging
 import tarfile
 from os import getenv
 from pathlib import Path
@@ -12,7 +13,8 @@ import pandas
 
 def main(spreadsheet_path, restricted_batch, aws_role_name, aws_bucket_name, restricted_dir, uploaded_dir, root_dir):
     """Main method which calls all other submethods."""
-    for current_dir, refid in to_process(spreadsheet_path):
+    for current_dir, refid in to_process(Path(root_dir, spreadsheet_path)):
+        logging.info(f"Processing package {refid} located at {current_dir}")
         package_root_path = Path(root_dir, current_dir)
         package_type = 'dir'
         if 'Backlog Project' in current_dir:
@@ -20,21 +22,30 @@ def main(spreadsheet_path, restricted_batch, aws_role_name, aws_bucket_name, res
         assert package_root_path.is_dir(), f"Package does not exist at {package_root_path}"
 
         remove_unwanted_files(package_root_path)
+        logging.info(f"Unwanted files removed from {refid}")
 
         if package_type == 'dir':
             renamed_path = rename_files(package_root_path, refid)
+            logging.info(f"Files in package {refid} renamed")
 
         if restricted_batch:
             move_to_dir(renamed_path, restricted_dir)
+            logging.info(f"Package {refid} is restricted, moving to {restricted_dir}")
         else:
             if package_type == 'dir':
                 create_bag(str(renamed_path))
+                logging.info(f"Bag created for package {refid}")
                 tarball_path = create_tarball(renamed_path)
+                logging.info(f"Tarball created at {tarball_path}")
             else:
                 update_bag(str(package_root_path))
+                logging.info(f"Bag created for package {refid}")
                 tarball_path = create_tarball(package_root_path)
+                logging.info(f"Tarball created at {tarball_path}")
             upload_package(tarball_path, aws_bucket_name, aws_role_name)
+            logging.info(f"Package {tarball_path} uploaded to {aws_bucket_name}")
             move_to_dir(tarball_path, uploaded_dir)
+            logging.info(f"Package {tarball_path} moved to {uploaded_dir}")
 
 
 def to_process(spreadsheet_path):
