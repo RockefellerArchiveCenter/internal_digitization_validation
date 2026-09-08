@@ -59,8 +59,8 @@ def to_process(spreadsheet_path):
     """
     df = pandas.read_excel(spreadsheet_path, header=0)
     for index, row in df.iterrows():
-        refid = row['refid'].strip()
-        current_dir = row['current_path'].strip()
+        refid = str(row['refid']).strip()
+        current_dir = str(row['current_path']).strip()
         yield current_dir, refid
 
 
