@@ -8,7 +8,7 @@ from src.process_packages import (create_tarball, main, move_to_dir,
                                   remove_unwanted_files, rename_files)
 
 DEFAULT_ARGS = [
-    '/spreadsheet/path',
+    'spreadsheet/path',
     False,
     'aws:iam:role:internal-digitization-role',
     'rac-dev-digitized-image-upload',
@@ -52,7 +52,7 @@ def test_main_with_dir(
 
     main(*DEFAULT_ARGS)
 
-    mock_data.assert_called_once_with('/spreadsheet/path')
+    mock_data.assert_called_once_with(Path('/local_storage/spreadsheet/path'))
     mock_unwanted.assert_called_once_with(Path(current_dir))
     mock_rename.assert_called_once_with(Path(current_dir), refid)
     mock_create_bag.assert_called_once_with(f'/volumes/data/Digitization/{refid}')
@@ -86,7 +86,7 @@ def test_main_with_bag(
 
     main(*DEFAULT_ARGS)
 
-    mock_data.assert_called_once_with('/spreadsheet/path')
+    mock_data.assert_called_once_with(Path('/local_storage/spreadsheet/path'))
     mock_unwanted.assert_called_once_with(Path(current_dir))
     mock_rename.assert_not_called()
     mock_create_bag.assert_not_called()
@@ -122,7 +122,7 @@ def test_main_with_restricted(
 
     main(*updated_args)
 
-    mock_data.assert_called_once_with('/spreadsheet/path')
+    mock_data.assert_called_once_with(Path('/local_storage/spreadsheet/path'))
     mock_unwanted.assert_called_once_with(Path(current_dir))
     mock_rename.assert_called_once_with(Path(current_dir), refid)
     mock_create_bag.assert_not_called()
