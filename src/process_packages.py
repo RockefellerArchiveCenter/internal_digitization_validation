@@ -161,7 +161,7 @@ def upload_package(tarball_path, aws_bucket_name, aws_role_arn):
     """
     session = boto3.Session()
     assumed_role_session = assume_role(session, aws_role_arn)
-    s3_client = assumed_role_session.client('s3')
+    s3_client = assumed_role_session.client('s3', region_name='us-east-1')
     s3_client.upload_file(str(tarball_path), aws_bucket_name, tarball_path.name)
 
 
