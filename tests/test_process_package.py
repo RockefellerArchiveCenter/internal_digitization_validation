@@ -62,7 +62,7 @@ def test_main_with_dir(
         f'/volumes/data/Digitization/{refid}.tar.gz',
         'rac-dev-digitized-image-upload',
         'aws:iam:role:internal-digitization-role')
-    mock_move.assert_called_once_with(f'/volumes/data/Digitization/{refid}.tar.gz', 'uploaded')
+    mock_move.assert_called_once_with(f'/volumes/data/Digitization/{refid}.tar.gz', Path('/local_storage', 'uploaded'))
     rmtree(current_dir)
 
 
@@ -96,7 +96,7 @@ def test_main_with_bag(
         f'/volumes/data/Digitization/Backlog Project/{refid}.tar.gz',
         'rac-dev-digitized-image-upload',
         'aws:iam:role:internal-digitization-role')
-    mock_move.assert_called_once_with(f'/volumes/data/Digitization/Backlog Project/{refid}.tar.gz', 'uploaded')
+    mock_move.assert_called_once_with(f'/volumes/data/Digitization/Backlog Project/{refid}.tar.gz', Path('/local_storage', 'uploaded'))
     rmtree(current_dir)
 
 
@@ -129,7 +129,7 @@ def test_main_with_restricted(
     mock_update_bag.assert_not_called()
     mock_tarball.assert_not_called()
     mock_upload.assert_not_called()
-    mock_move.assert_called_once_with(f'/volumes/data/Digitization/{refid}', 'restricted')
+    mock_move.assert_called_once_with(f'/volumes/data/Digitization/{refid}', Path('/local_storage', 'restricted'))
     rmtree(current_dir)
 
 

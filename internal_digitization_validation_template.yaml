@@ -231,7 +231,7 @@ Resources:
               "awslogs-stream-prefix": "on-prem"
       ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
       Family: !Ref ApplicationName
-      NetworkMode: none
+      NetworkMode: bridge
       RequiresCompatibilities:
         - EXTERNAL
       RuntimePlatform:

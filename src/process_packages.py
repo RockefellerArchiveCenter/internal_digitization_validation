@@ -22,6 +22,8 @@ def main(spreadsheet_path, restricted_batch, aws_role_arn, aws_bucket_name, rest
     for current_dir, refid in to_process(Path(root_dir, spreadsheet_path)):
         logging.info(f"Processing package {refid} located at {current_dir}")
         package_root_path = Path(root_dir, current_dir)
+        uploaded_path = Path(root_dir, uploaded_dir)
+        restricted_path = Path(root_dir, restricted_dir)
         package_type = 'dir'
         if 'Backlog Project' in current_dir:
             package_type = 'bag'
@@ -35,8 +37,8 @@ def main(spreadsheet_path, restricted_batch, aws_role_arn, aws_bucket_name, rest
             logging.info(f"Files in package {refid} renamed")
 
         if restricted_batch:
-            move_to_dir(renamed_path, restricted_dir)
-            logging.info(f"Package {refid} is restricted, moving to {restricted_dir}")
+            move_to_dir(renamed_path, restricted_path)
+            logging.info(f"Package {refid} is restricted, moving to {restricted_path}")
         else:
             if package_type == 'dir':
                 create_bag(str(renamed_path))
@@ -50,8 +52,8 @@ def main(spreadsheet_path, restricted_batch, aws_role_arn, aws_bucket_name, rest
                 logging.info(f"Tarball created at {tarball_path}")
             upload_package(tarball_path, aws_bucket_name, aws_role_arn)
             logging.info(f"Package {tarball_path} uploaded to {aws_bucket_name}")
-            move_to_dir(tarball_path, uploaded_dir)
-            logging.info(f"Package {tarball_path} moved to {uploaded_dir}")
+            move_to_dir(tarball_path, uploaded_path)
+            logging.info(f"Package {tarball_path} moved to {uploaded_path}")
 
 
 def to_process(spreadsheet_path):
