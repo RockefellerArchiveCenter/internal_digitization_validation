@@ -35,6 +35,9 @@ Mappings:
     LocalStorageMountDir:
       dev: /assets
       prod: /assets
+    LocalStorageSourcePath:
+      dev: /mnt/dev
+      prod: /mnt/prod
 
 Resources:
   ECSTaskExecutionRole:
@@ -249,7 +252,7 @@ Resources:
       Volumes: 
         - Name: local_storage
           Host: 
-            SourcePath: "/mnt/dev"
+            SourcePath: !FindInMap [Directories, LocalStorageSourcePath, !Ref ApplicationEnvironment]
 
 Outputs:
   ValidationECSTask:
