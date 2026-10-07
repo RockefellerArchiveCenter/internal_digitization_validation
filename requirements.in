@@ -1,3 +1,4 @@
+aws-assume-role-lib~=2.10
 bagit~=1.9
 boto3~=1.43
 openpyxl~=3.1

@@ -9,13 +9,21 @@ from shutil import copytree, rmtree
 import bagit
 import boto3
 import pandas
+from aws_assume_role_lib import assume_role
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(filename)s::%(funcName)s::%(lineno)s %(message)s')
+logging.getLogger("bagit").setLevel(logging.ERROR)
 
 
-def main(spreadsheet_path, restricted_batch, aws_role_name, aws_bucket_name, restricted_dir, uploaded_dir, root_dir):
+def main(spreadsheet_path, restricted_batch, aws_role_arn, aws_bucket_name, restricted_dir, uploaded_dir, root_dir):
     """Main method which calls all other submethods."""
     for current_dir, refid in to_process(Path(root_dir, spreadsheet_path)):
         logging.info(f"Processing package {refid} located at {current_dir}")
         package_root_path = Path(root_dir, current_dir)
+        uploaded_path = Path(root_dir, uploaded_dir)
+        restricted_path = Path(root_dir, restricted_dir)
         package_type = 'dir'
         if 'Backlog Project' in current_dir:
             package_type = 'bag'
@@ -29,8 +37,8 @@ def main(spreadsheet_path, restricted_batch, aws_role_name, aws_bucket_name, res
             logging.info(f"Files in package {refid} renamed")
 
         if restricted_batch:
-            move_to_dir(renamed_path, restricted_dir)
-            logging.info(f"Package {refid} is restricted, moving to {restricted_dir}")
+            move_to_dir(renamed_path, restricted_path)
+            logging.info(f"Package {refid} is restricted, moving to {restricted_path}")
         else:
             if package_type == 'dir':
                 create_bag(str(renamed_path))
@@ -42,10 +50,10 @@ def main(spreadsheet_path, restricted_batch, aws_role_name, aws_bucket_name, res
                 logging.info(f"Bag created for package {refid}")
                 tarball_path = create_tarball(package_root_path)
                 logging.info(f"Tarball created at {tarball_path}")
-            upload_package(tarball_path, aws_bucket_name, aws_role_name)
+            upload_package(tarball_path, aws_bucket_name, aws_role_arn)
             logging.info(f"Package {tarball_path} uploaded to {aws_bucket_name}")
-            move_to_dir(tarball_path, uploaded_dir)
-            logging.info(f"Package {tarball_path} moved to {uploaded_dir}")
+            move_to_dir(tarball_path, uploaded_path)
+            logging.info(f"Package {tarball_path} moved to {uploaded_path}")
 
 
 def to_process(spreadsheet_path):
@@ -145,23 +153,24 @@ def create_tarball(dir_path):
     return tar_path
 
 
-def upload_package(tarball_path, aws_bucket_name, aws_role_name):
+def upload_package(tarball_path, aws_bucket_name, aws_role_arn):
     """Uploads package to S3 bucket.
 
     Args:
         tarball_path (pathlib.Path): Path of file to upload.
         aws_bucket_name (str): name of S3 bucket to upload files to
-        aws_role_name (str): Name of AWS role to assume in session
+        aws_role_arn (str): Name of AWS role to assume in session
     """
-    aws_session = boto3.Session(profile_name=aws_role_name)
-    s3_client = aws_session.client('s3')
+    session = boto3.Session()
+    assumed_role_session = assume_role(session, aws_role_arn)
+    s3_client = assumed_role_session.client('s3', region_name='us-east-1')
     s3_client.upload_file(str(tarball_path), aws_bucket_name, tarball_path.name)
 
 
 if __name__ == '__main__':
     spreadsheet_path = getenv('SPREADSHEET_PATH')
     restricted_batch = getenv('RESTRICTED_BATCH')
-    aws_role_name = getenv('AWS_ROLE_NAME')
+    aws_role_arn = getenv('AWS_ROLE_ARN')
     aws_bucket_name = getenv('AWS_BUCKET_NAME')
     restricted_dir = getenv('RESTRICTED_DIR')
     uploaded_dir = getenv('UPLOADED_DIR')
@@ -169,7 +178,7 @@ if __name__ == '__main__':
     main(
         spreadsheet_path,
         restricted_batch,
-        aws_role_name,
+        aws_role_arn,
         aws_bucket_name,
         restricted_dir,
         uploaded_dir,
