@@ -9,7 +9,6 @@ from src.process_packages import (create_tarball, main, move_to_dir,
 
 DEFAULT_ARGS = [
     'spreadsheet/path',
-    False,
     'aws:iam:role:internal-digitization-role',
     'rac-dev-digitized-image-upload',
     'restricted',
@@ -45,7 +44,7 @@ def test_main_with_dir(
         mock_rename, mock_unwanted, mock_data):
     current_dir = '/volumes/data/Digitization/123456'
     refid = '1a2b3c4d5e6f7h8i9j10k'
-    mock_data.return_value = [(current_dir, refid)]
+    mock_data.return_value = [(current_dir, refid, False)]
     mock_rename.return_value = f'/volumes/data/Digitization/{refid}'
     mock_tarball.return_value = f'/volumes/data/Digitization/{refid}.tar.gz'
     Path(current_dir).mkdir(parents=True)
@@ -79,7 +78,7 @@ def test_main_with_bag(
         mock_rename, mock_unwanted, mock_data):
     refid = '1a2b3c4d5e6f7h8i9j10k'
     current_dir = f'/volumes/data/Digitization/Backlog Project/{refid}'
-    mock_data.return_value = [(current_dir, refid)]
+    mock_data.return_value = [(current_dir, refid, False)]
     mock_rename.return_value = current_dir
     mock_tarball.return_value = f'/volumes/data/Digitization/Backlog Project/{refid}.tar.gz'
     Path(current_dir).mkdir(parents=True)
@@ -113,14 +112,12 @@ def test_main_with_restricted(
         mock_rename, mock_unwanted, mock_data):
     current_dir = '/volumes/data/Digitization/123456'
     refid = '1a2b3c4d5e6f7h8i9j10k'
-    mock_data.return_value = [(current_dir, refid)]
+    mock_data.return_value = [(current_dir, refid, True)]
     mock_rename.return_value = f'/volumes/data/Digitization/{refid}'
     mock_tarball.return_value = f'/volumes/data/Digitization/{refid}.tar.gz'
     Path(current_dir).mkdir(parents=True)
-    updated_args = DEFAULT_ARGS
-    updated_args[1] = True
 
-    main(*updated_args)
+    main(*DEFAULT_ARGS)
 
     mock_data.assert_called_once_with(Path('/local_storage/spreadsheet/path'))
     mock_unwanted.assert_called_once_with(Path(current_dir))
