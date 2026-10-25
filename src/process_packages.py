@@ -17,9 +17,9 @@ logging.basicConfig(
 logging.getLogger("bagit").setLevel(logging.ERROR)
 
 
-def main(spreadsheet_path, restricted_batch, aws_role_arn, aws_bucket_name, restricted_dir, uploaded_dir, root_dir):
+def main(spreadsheet_path, aws_role_arn, aws_bucket_name, restricted_dir, uploaded_dir, root_dir):
     """Main method which calls all other submethods."""
-    for current_dir, refid in to_process(Path(root_dir, spreadsheet_path)):
+    for current_dir, refid, restricted in to_process(Path(root_dir, spreadsheet_path)):
         logging.info(f"Processing package {refid} located at {current_dir}")
         package_root_path = Path(root_dir, current_dir)
         uploaded_path = Path(root_dir, uploaded_dir)
@@ -36,7 +36,7 @@ def main(spreadsheet_path, restricted_batch, aws_role_arn, aws_bucket_name, rest
             renamed_path = rename_files(package_root_path, refid)
             logging.info(f"Files in package {refid} renamed")
 
-        if restricted_batch:
+        if restricted:
             move_to_dir(renamed_path, restricted_path)
             logging.info(f"Package {refid} is restricted, moving to {restricted_path}")
         else:
@@ -63,13 +63,15 @@ def to_process(spreadsheet_path):
         spreadsheet_path (str): Location of XSLX spreadsheet to parse.
 
     Returns:
-        Iterator of current_dir, refid
+        Iterator of current_dir, refid, restricted
     """
     df = pandas.read_excel(spreadsheet_path, header=0)
     for index, row in df.iterrows():
         refid = str(row['refid']).strip()
         current_dir = str(row['current_path']).strip()
-        yield current_dir, refid
+        unrestricted_value = str(row['unrestricted']).strip()
+        restricted = False if unrestricted_value == 'Yes' else True
+        yield current_dir, refid, restricted
 
 
 def move_to_dir(current_path, target_dir):
@@ -169,7 +171,6 @@ def upload_package(tarball_path, aws_bucket_name, aws_role_arn):
 
 if __name__ == '__main__':
     spreadsheet_path = getenv('SPREADSHEET_PATH')
-    restricted_batch = getenv('RESTRICTED_BATCH')
     aws_role_arn = getenv('AWS_ROLE_ARN')
     aws_bucket_name = getenv('AWS_BUCKET_NAME')
     restricted_dir = getenv('RESTRICTED_DIR')
@@ -177,7 +178,6 @@ if __name__ == '__main__':
     root_dir = getenv('ROOT_DIR')
     main(
         spreadsheet_path,
-        restricted_batch,
         aws_role_arn,
         aws_bucket_name,
         restricted_dir,
