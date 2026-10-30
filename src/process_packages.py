@@ -20,40 +20,44 @@ logging.getLogger("bagit").setLevel(logging.ERROR)
 def main(spreadsheet_path, aws_role_arn, aws_bucket_name, restricted_dir, uploaded_dir, root_dir):
     """Main method which calls all other submethods."""
     for current_dir, refid, restricted in to_process(Path(root_dir, spreadsheet_path)):
-        logging.info(f"Processing package {refid} located at {current_dir}")
         package_root_path = Path(root_dir, current_dir)
-        uploaded_path = Path(root_dir, uploaded_dir)
-        restricted_path = Path(root_dir, restricted_dir)
-        package_type = 'dir'
-        if 'Backlog Project' in current_dir:
-            package_type = 'bag'
-        assert package_root_path.is_dir(), f"Package does not exist at {package_root_path}"
 
-        remove_unwanted_files(package_root_path)
-        logging.info(f"Unwanted files removed from {refid}")
+        if package_root_path.is_dir():
+            logging.info(f"Processing package {refid} located at {current_dir}")
+            uploaded_path = Path(root_dir, uploaded_dir)
+            restricted_path = Path(root_dir, restricted_dir)
+            package_type = 'dir'
+            if 'Backlog Project' in current_dir:
+                package_type = 'bag'
+            assert package_root_path.is_dir(), f"Package does not exist at {package_root_path}"
 
-        if package_type == 'dir':
-            renamed_path = rename_files(package_root_path, refid)
-            logging.info(f"Files in package {refid} renamed")
+            remove_unwanted_files(package_root_path)
+            logging.info(f"Unwanted files removed from {refid}")
 
-        if restricted:
-            move_to_dir(renamed_path, restricted_path)
-            logging.info(f"Package {refid} is restricted, moving to {restricted_path}")
-        else:
             if package_type == 'dir':
-                create_bag(str(renamed_path))
-                logging.info(f"Bag created for package {refid}")
-                tarball_path = create_tarball(renamed_path)
-                logging.info(f"Tarball created at {tarball_path}")
+                renamed_path = rename_files(package_root_path, refid)
+                logging.info(f"Files in package {refid} renamed")
+
+            if restricted:
+                move_to_dir(renamed_path, restricted_path)
+                logging.info(f"Package {refid} is restricted, moving to {restricted_path}")
             else:
-                update_bag(str(package_root_path))
-                logging.info(f"Bag created for package {refid}")
-                tarball_path = create_tarball(package_root_path)
-                logging.info(f"Tarball created at {tarball_path}")
-            upload_package(tarball_path, aws_bucket_name, aws_role_arn)
-            logging.info(f"Package {tarball_path} uploaded to {aws_bucket_name}")
-            move_to_dir(tarball_path, uploaded_path)
-            logging.info(f"Package {tarball_path} moved to {uploaded_path}")
+                if package_type == 'dir':
+                    create_bag(str(renamed_path))
+                    logging.info(f"Bag created for package {refid}")
+                    tarball_path = create_tarball(renamed_path)
+                    logging.info(f"Tarball created at {tarball_path}")
+                else:
+                    update_bag(str(package_root_path))
+                    logging.info(f"Bag created for package {refid}")
+                    tarball_path = create_tarball(package_root_path)
+                    logging.info(f"Tarball created at {tarball_path}")
+                upload_package(tarball_path, aws_bucket_name, aws_role_arn)
+                logging.info(f"Package {tarball_path} uploaded to {aws_bucket_name}")
+                move_to_dir(tarball_path, uploaded_path)
+                logging.info(f"Package {tarball_path} moved to {uploaded_path}")
+        else:
+            logging.info(f"Package {refid} does not exist at {current_dir}, skipping")
 
 
 def to_process(spreadsheet_path):
