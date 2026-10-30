@@ -194,9 +194,8 @@ Resources:
 
   InternalValidationECSTask:
     Type: AWS::ECS::TaskDefinition
-    Properties: 
-      Cpu: "1024"
-      Memory: "3072"
+    Properties:
+      Memory: "24576"
       ContainerDefinitions: 
         - Name: !Ref ApplicationName
           Image: !Sub "${ContainerAccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ApplicationName}:${ApplicationEnvironment}"
