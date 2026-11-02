@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.1](https://github.com/RockefellerArchiveCenter/internal_digitization_validation/compare/v1.0.0...v1.0.1) (2026-11-02)
+
+
+### Bug Fixes
+
+* **deps:** Scheduled dependency updates ([a1258bc](https://github.com/RockefellerArchiveCenter/internal_digitization_validation/commit/a1258bc34f42219827d68cede3eea3d139a2c2b6))
+* **deps:** Scheduled dependency updates ([a1258bc](https://github.com/RockefellerArchiveCenter/internal_digitization_validation/commit/a1258bc34f42219827d68cede3eea3d139a2c2b6))
+* **deps:** Scheduled dependency updates ([e727117](https://github.com/RockefellerArchiveCenter/internal_digitization_validation/commit/e727117465e5c58183b4547f4b5adbff180eb12f))
+* **deps:** Scheduled dependency updates ([e727117](https://github.com/RockefellerArchiveCenter/internal_digitization_validation/commit/e727117465e5c58183b4547f4b5adbff180eb12f))
+* **deps:** Scheduled dependency updates ([6e35cfe](https://github.com/RockefellerArchiveCenter/internal_digitization_validation/commit/6e35cfed9e2c2f8f9c53e2f7a9013e5ff179d6ba))
+
 ## 1.0.0 (2026-11-02)
 
 
