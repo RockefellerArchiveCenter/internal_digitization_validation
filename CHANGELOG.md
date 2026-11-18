@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.2](https://github.com/RockefellerArchiveCenter/internal_digitization_validation/compare/v1.0.1...v1.0.2) (2026-11-18)
+
+
+### Bug Fixes
+
+* target correct backlog directory ([23e61de](https://github.com/RockefellerArchiveCenter/internal_digitization_validation/commit/23e61deaa08d344c78418bedcb1adbe512f43ae2))
+* use correct backlog directory ([3ba0044](https://github.com/RockefellerArchiveCenter/internal_digitization_validation/commit/3ba0044d50f0b647060cafb4c9d58fa07a5c62fb))
+
 ## [1.0.1](https://github.com/RockefellerArchiveCenter/internal_digitization_validation/compare/v1.0.0...v1.0.1) (2026-11-02)
 
 
