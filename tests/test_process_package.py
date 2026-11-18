@@ -77,10 +77,10 @@ def test_main_with_bag(
         mock_move, mock_upload, mock_tarball, mock_update_bag, mock_create_bag,
         mock_rename, mock_unwanted, mock_data):
     refid = '1a2b3c4d5e6f7h8i9j10k'
-    current_dir = f'/volumes/data/Digitization/Backlog Project/{refid}'
+    current_dir = f'/volumes/data/Digitization/Backlog_Project/{refid}'
     mock_data.return_value = [(current_dir, refid, False)]
     mock_rename.return_value = current_dir
-    mock_tarball.return_value = f'/volumes/data/Digitization/Backlog Project/{refid}.tar.gz'
+    mock_tarball.return_value = f'/volumes/data/Digitization/Backlog_Project/{refid}.tar.gz'
     Path(current_dir).mkdir(parents=True)
 
     main(*DEFAULT_ARGS)
@@ -92,10 +92,10 @@ def test_main_with_bag(
     mock_update_bag.assert_called_once_with(current_dir)
     mock_tarball.assert_called_once_with(Path(current_dir))
     mock_upload.assert_called_once_with(
-        f'/volumes/data/Digitization/Backlog Project/{refid}.tar.gz',
+        f'/volumes/data/Digitization/Backlog_Project/{refid}.tar.gz',
         'rac-dev-digitized-image-upload',
         'aws:iam:role:internal-digitization-role')
-    mock_move.assert_called_once_with(f'/volumes/data/Digitization/Backlog Project/{refid}.tar.gz', Path('/local_storage', 'uploaded'))
+    mock_move.assert_called_once_with(f'/volumes/data/Digitization/Backlog_Project/{refid}.tar.gz', Path('/local_storage', 'uploaded'))
     rmtree(current_dir)
 
 

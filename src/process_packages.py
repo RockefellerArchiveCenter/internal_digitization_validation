@@ -27,7 +27,7 @@ def main(spreadsheet_path, aws_role_arn, aws_bucket_name, restricted_dir, upload
             uploaded_path = Path(root_dir, uploaded_dir)
             restricted_path = Path(root_dir, restricted_dir)
             package_type = 'dir'
-            if 'Backlog Project' in current_dir:
+            if 'Backlog_Project' in current_dir:
                 package_type = 'bag'
             assert package_root_path.is_dir(), f"Package does not exist at {package_root_path}"
 
