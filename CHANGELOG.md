@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.3](https://github.com/RockefellerArchiveCenter/internal_digitization_validation/compare/v1.0.2...v1.0.3) (2026-11-19)
+
+
+### Bug Fixes
+
+* update deploy ([28938e5](https://github.com/RockefellerArchiveCenter/internal_digitization_validation/commit/28938e52158b3b074fd58e4a5af459e8c6465926))
+* update deploy ([72f1df9](https://github.com/RockefellerArchiveCenter/internal_digitization_validation/commit/72f1df974c624b62df1748313c91dc026a5f67a9))
+* update deploy ([d514eef](https://github.com/RockefellerArchiveCenter/internal_digitization_validation/commit/d514eef17e7dec9a57fd29eeed1e63ca9b62fea8))
+
 ## [1.0.2](https://github.com/RockefellerArchiveCenter/internal_digitization_validation/compare/v1.0.1...v1.0.2) (2026-11-18)
 
 
